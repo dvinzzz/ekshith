@@ -1,0 +1,152 @@
+
+
+
+
+
+import numpy as np
+
+# Define the input data for the AND gate
+X = np.array([[0, 0],
+              [0, 1],
+              [1, 0],
+              [1, 1]])
+
+# Define the desired output for the AND gate
+d = np.array([0, 0, 0, 1])
+
+# Initialize the weights to zeros
+W = np.zeros(3)
+
+# Learning rate
+lr = 1
+
+# Number of epochs
+epochs = 10
+
+# Training the perceptron
+for _ in range(epochs):
+    for xi, target in zip(X, d):
+        xi = np.insert(xi, 0, 1)  # Add bias term
+        y = 1 if np.dot(W, xi) >= 0 else 0  # Calculate the output
+        W += lr * (target - y) * xi  # Update the weights
+
+# Testing the perceptron
+print("AND Gate:")
+for xi in X:
+    xi = np.insert(xi, 0, 1)  # Add bias term
+    y = 1 if np.dot(W, xi) >= 0 else 0  # Calculate the output
+    print(f"Input: {xi[1:]}, Predicted Output: {y}")
+
+
+
+
+
+
+
+
+
+import numpy as np
+
+def unitStep(v):
+    return 1 if v >= 0 else 0
+
+def perceptronModel(x, w, b):
+    v = np.dot(w, x) + b
+    return unitStep(v)
+
+# XOR logic using two perceptrons
+def XOR_logicFunction(x):
+    # First layer perceptrons
+    w1 = np.array([1, 1])
+    b1 = -1.5
+    y1 = perceptronModel(x, w1, b1)  # AND
+
+    w2 = np.array([1, 1])
+    b2 = -0.5
+    y2 = perceptronModel(x, w2, b2)  # OR
+
+    # Second layer perceptron
+    w3 = np.array([-1, 1])
+    b3 = -0.5
+    final_x = np.array([y1, y2])
+    finalOutput = perceptronModel(final_x, w3, b3)  # AND(NOT(y1), y2)
+    
+    return finalOutput
+
+# Testing the XOR gate
+test_cases = [np.array([0, 0]), np.array([0, 1]), np.array([1, 0]), np.array([1, 1])]
+for x in test_cases:
+    print(f"XOR({x[0]}, {x[1]}) = {XOR_logicFunction(x)}")
+
+
+
+
+
+
+
+import numpy as np
+
+def fit_adaline(X,y,learning_rate=0.01,epochs=100):
+
+    #initializing random weights and bias
+    weights=np.zeros(X.shape[1])
+    bias=0.0
+
+    for _ in range(epochs):
+        for x_i,target in zip(X,y):
+
+            input=np.dot(x_i,weights) + bias
+            output=input #linear activation
+
+            error=target-output
+
+            #weights updating
+            weights+=learning_rate * error * x_i
+            bias+=learning_rate * error
+
+    return weights,bias
+
+def predict(X,weights,bias):
+    output=np.dot(X,weights)+bias
+    return np.where(output >=0.0,1,-1)
+
+if __name__=="__main__":
+    
+    X=np.array([[0,0],
+                [0,1],
+                [1,0],
+                [1,1]])
+    y=np.array([[-1],[-1],[-1],[1]])
+
+    weights,bias=fit_adaline(X,y)
+    predictions=predict(X,weights,bias)
+
+    print(f"weights is :{weights}")
+    print(f"bias is : {bias}")
+    print(f"predictions are \n {predictions}")
+
+
+
+
+
+import numpy as np
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense 
+from tensorflow.keras.utils import to_categorical
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+X_train = X_train.reshape(-1, 28, 28, 1).astype('float32') / 255.0
+X_test = X_test.reshape(-1, 28, 28, 1).astype('float32') / 255.0
+y_train = to_categorical(y_train)
+y_test = to_categorical(y_test)
+model = Sequential([
+   Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)), MaxPooling2D((2, 2)),
+   Flatten(),
+   Dense(128, activation='relu'),
+   Dense(10, activation='softmax') 
+])
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+model.fit(X_train, y_train, epochs=5, batch_size=64, verbose=1) 
+loss, accuracy = model.evaluate(X_test, y_test, verbose=0) 
+print(f'Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}')
+    
